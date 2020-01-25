@@ -1,0 +1,24 @@
+<?php
+function cleaCookie(){
+	unset($_COOKIE['count_num_ec2']);
+	location.reload();
+}
+$cookie_num = htmlspecialchars($_COOKIE["count_num_ec2"]);
+
+define("temp_len","./count.txt");
+$temp_num = file_get_contents(temp_len);
+
+if($cookie_num == ''){
+	$temp_num += 1;
+	setcookie("count_num_ec2",$temp_num);
+	echo "あなたは $temp_num 人目です";
+	$fh = fopen(temp_len,'w');
+	fwrite($fh,$temp_num);
+	fclose($fh);
+}else{
+	echo "I'm glad you're back<br>";
+	echo "あんたは $cookie_num 人目の時に訪問しました<br>";
+	echo "現在は総合 $temp_num 人が訪問しています<br>";
+}
+?>
+<button onclick = "cleaCookie()">Cookie削除</button>

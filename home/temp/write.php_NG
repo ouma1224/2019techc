@@ -1,0 +1,38 @@
+<?php
+if(empty($_POST['body'])){
+	header("HTTP/1.1 302 Found");
+	header("Location: ./home.php");
+	return;
+}
+
+$image_path = null;
+
+$upload_image = $_FILES['image'];
+if($upload_image['size'] > 0){
+	
+	if(!exif_imagetype($upload_image['tmp_name'])){
+		print("アップロードできるのは画像のみです");
+		return;
+	}
+
+	$ext = pathinfo($upload_image['name'], PATHINFO_EXTENSION);
+	$image_filename = sprintf("%d_%d.%s", time(),rand(100000, 999999), $ext);
+	$image_filepath = '/static/upload_image/' . $image_filename;
+	copy($upload_image['tmp_name'],$image_filepath);
+	$image_path = 'src/2019techc/public/static/up_image/' . $image_filename;
+}
+
+$name = $_POST['name'];
+$body = $_POST['body'];
+
+require_once './DB_Connection.php';
+$pdo = getDB();
+
+$insert_str = $pdo->prepare("INSERT INTO content (name,body,img_link) VALUES (:name,:body,:img_link)");
+$insert_str->execute(array(':name' => $name, ':body' => $body,':img_link' => $image_path, ));
+
+
+
+header("HTTP/1.1 303 See Other");
+header("Location: ./home.php");
+?>

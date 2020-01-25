@@ -1,0 +1,94 @@
+<?php
+$cookie_num = htmlspecialchars($_COOKIE["count_num_ec2"]);
+
+//外部ファイルからmysqlの取得
+require_once 'DB_Connection.php';
+$pdo = getDB();
+
+//このページの紐付け行のnameを決める
+$pege_name = 'ec2_home';
+
+// 行の中身を取得(SELECT)
+$select_sth = $pdo->prepare('SELECT *  FROM counter WHERE name = :name');
+$select_sth->execute(array(':name' => $pege_name));
+$result = $select_sth->fetch();
+
+//該当行がない場合、行を作成する
+if(!$result) {
+    $insert_sth = $pdo->prepare("INSERT INTO counter (name, count) VALUES (:name, 0)");
+    $insert_sth->execute(array(':name' => $pege_name ));
+    
+    // 行を作ったので取得しなおす
+    $select_sth->execute(array(':name' => $pege_name));
+    $result = $select_sth->fetch();
+}
+
+//tempに代入
+$temp_num = $result['count'];
+
+//すでに訪問したかどうか判定
+if($cookie_num == ''){
+    $temp_num += 1;
+    setcookie("count_num_ec2",$temp_num);
+    $count_num_mes = "あなたは $temp_num 人目です";
+    $falg = 0;
+}else{
+    $comeback_num_mes = "あなたは $cookie_num 人目の時に来訪した方です";
+    $count_Nownum_mes = "現在は $temp_num 人来訪しています";
+    $flag = 1;
+}
+
+$update_sth = $pdo->prepare("UPDATE counter SET count = :count WHERE name = :name");
+$update_sth->execute(array(':name' => $pege_name, ':count' => $temp_num));
+
+?>
+
+   <html>
+    <head>
+        <meta charset="utf-8">
+    </head>
+    <body>
+       <p>
+       <?php
+if($flag == 0){
+              echo  $count_num_mes;
+           }else{
+		echo $comeback_num_mes;?>
+		<br>
+	<?php  echo $count_Nownum_mes; }
+?></p>
+<?php
+// 行の中身を取る
+$select_sth = $pdo->prepare('SELECT *  FROM content ORDER BY id ASC');
+$select_sth->execute();
+$rows = $select_sth->fetchAll();
+?>
+
+<?php foreach ($rows as $row) : ?>
+<div>
+    <span><?php if ($row['name']) { echo $row['name']; } else { echo "名無し"; } ?>さんの投稿 (投稿日: <?php echo $row['created_tame']; ?>)</span>    <p>
+        <?php echo $row['body']; ?>
+    </p>
+	<?php if($row['img_link']){ ?>
+	<p>
+		<img src="<?php echo $row['img_link'] ?>" height="200px">
+	</p>
+	<?php }?>
+</div>
+<?php endforeach; ?>
+	<form method = "POST" action = "./write.php" enctype="multipart/form-data">
+		<div>
+			名前: <input type = "text" name = "name">
+		</div>
+		<div>
+			<textarea name = "body" rows="5" cols = "100" required></textarea>
+		</div>
+		<div>
+			画像ファイルUP: <input type = "file" name="image" accept = "image/*">
+		</div>
+		<input type = "submit">
+	</form>
+	
+
+    </body>
+</html>

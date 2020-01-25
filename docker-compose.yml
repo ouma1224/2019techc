@@ -12,3 +12,5 @@ services:
     build: ./nginx/
     ports:
       - 80:80
+    volumes:
+      - ./public/static/:/public/static/
