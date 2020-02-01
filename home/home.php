@@ -1,10 +1,10 @@
 <?php
 // 接続 ref. https://www.php.net/manual/ja/pdo.connections.php
 // $dbh = new PDO('mysql:host=database-1.ca1qzt127uj2.us-east-1.rds.amazonaws.com;dbname=Count', 'admin', 'testpass');
-require_once 'DB_Connection.php';
+require_once 'DB_Connection_SNS.php';
 $dbh = getDB();
 // 行の中身を取る
-$select_sth = $dbh->prepare('SELECT name, body, created_time, filename FROM content ORDER BY id ASC');
+$select_sth = $dbh->prepare('SELECT * FROM contents ORDER BY id ASC');
 $select_sth->execute();
 $rows = $select_sth->fetchAll();
 ?>
@@ -30,9 +30,9 @@ if(!($_COOKIE['User_name'])){
     <p>
         <?php echo $row['body']; ?>
     </p>
-    <?php if (!empty($row['filename'])) { ?>
+    <?php if (!empty($row['file_path'])) { ?>
     <p>
-        <img src="/static/images/<?php echo $row['filename']; ?>" width="200px">
+        <img src="/static/images/<?php echo $row['file_path']; ?>" width="200px">
     </p>
     <?php } ?>
 </div>  

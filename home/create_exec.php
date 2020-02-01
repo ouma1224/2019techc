@@ -15,8 +15,8 @@ $pass = $_POST['pass'];
 $repass = $_POST['repass'];
 $flag = false;
 
-#同じuser_idがないか　あったら入力フォームに戻す
-$select_sth = $dbh->prepare('SELECT user_id FROM users');
+#同じuser_nameがないか　あったら入力フォームに戻す
+$select_sth = $dbh->prepare('SELECT user_name FROM users');
 $select_sth->execute();
 $rows = $select_sth->fetchAll();
 foreach($rows as $row):
